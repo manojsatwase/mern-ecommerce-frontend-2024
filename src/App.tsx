@@ -10,6 +10,8 @@ import { auth } from "../firebase";
 import { getUser } from "./redux/api/userAPI";
 import { userExist, userNotExist } from "./redux/reducer/userReducer";
 import { RootState } from "./redux/store";
+import { UserResponse } from "./types/api-types";
+import { User } from "./types/types";
 
 const Home = lazy(() => import("./pages/home"));
 const Search = lazy(() => import("./pages/search"));
@@ -48,13 +50,27 @@ const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const data = await getUser(user.uid);
-        dispatch(userExist(data.user));
-      } else dispatch(userNotExist());
-    });
-  }, []);
+    const fetchUserData = async () => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const data: UserResponse = await getUser(user.uid);
+          if (Array.isArray(data) && data.length > 0) {
+            const singleUser: User = data[0]; // Assuming UserResponse is an array of User objects
+            dispatch(userExist(singleUser));
+          } else {
+            // Handle case when data is empty or not an array
+            dispatch(userNotExist());
+          }
+        } else {
+          // Handle case when user is not authenticated
+          dispatch(userNotExist());
+        }
+      });
+    };
+
+    fetchUserData();
+  }, [dispatch]);
+
 
   return loading ? (
     <Loader />
