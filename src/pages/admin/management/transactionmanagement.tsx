@@ -40,7 +40,7 @@ const TransactionManagement = () => {
     (state: { userReducer: UserReducerInitialState }) => state.userReducer
   );
 
-  const { isLoading, data, isError, error } = useOrderDetailsQuery(id!);
+  const { isLoading, data, isError } = useOrderDetailsQuery(id!);
 
   const {
     shippingInfo: { address, city, state, country, pinCode },
